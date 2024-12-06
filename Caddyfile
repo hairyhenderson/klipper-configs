@@ -1,0 +1,38 @@
+:7800 {
+	@proxypaths {
+		path /printer*
+		path /api*
+		path /access*
+		path /machine*
+		path /server*
+	}
+
+	handle @proxypaths {
+		reverse_proxy 127.0.0.1:7125 {
+			transport http {
+				read_timeout 60s
+				versions 1.1
+			}
+		}
+	}
+
+	handle /websocket {
+		reverse_proxy 127.0.0.1:7125 {
+			transport http {
+				read_timeout 86400s
+				versions 1.1
+			}
+		}
+	}
+
+	# webcam is configured in /boot/octopi.txt, listening at 8080
+	handle /webcam/ {
+		rewrite /
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle /* {
+		root * /home/pi/mainsail
+		file_server
+	}
+}
